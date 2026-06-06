@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 public class IssueRequest {
     private Long officerId;
     private String purpose;
+    private Long ammoBatchId;
     private int ammoIssued;
     private LocalDateTime dueAt;
 
@@ -13,6 +14,8 @@ public class IssueRequest {
     public void setOfficerId(Long officerId) { this.officerId = officerId; }
     public String getPurpose() { return purpose; }
     public void setPurpose(String purpose) { this.purpose = purpose; }
+    public Long getAmmoBatchId() { return ammoBatchId; }
+    public void setAmmoBatchId(Long ammoBatchId) { this.ammoBatchId = ammoBatchId; }
     public int getAmmoIssued() { return ammoIssued; }
     public void setAmmoIssued(int ammoIssued) { this.ammoIssued = ammoIssued; }
     public LocalDateTime getDueAt() { return dueAt; }

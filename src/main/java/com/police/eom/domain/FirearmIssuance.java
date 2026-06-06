@@ -24,11 +24,20 @@ public class FirearmIssuance {
     @Column(nullable = false, length = 255)
     private String purpose = "";
 
+    @Column(name = "ammo_batch_id")
+    private Long ammoBatchId;
+
     @Column(name = "ammo_issued", nullable = false)
     private int ammoIssued = 0;
 
     @Column(name = "ammo_returned")
     private Integer ammoReturned;
+
+    @Column(name = "ammo_consumed", nullable = false)
+    private int ammoConsumed = 0;
+
+    @Column(name = "reconciliation_status", nullable = false, length = 16)
+    private String reconciliationStatus = "PENDING";
 
     @Column(name = "issued_at", nullable = false)
     private LocalDateTime issuedAt;
@@ -55,10 +64,16 @@ public class FirearmIssuance {
     public void setOfficerId(Long officerId) { this.officerId = officerId; }
     public String getPurpose() { return purpose; }
     public void setPurpose(String purpose) { this.purpose = purpose; }
+    public Long getAmmoBatchId() { return ammoBatchId; }
+    public void setAmmoBatchId(Long ammoBatchId) { this.ammoBatchId = ammoBatchId; }
     public int getAmmoIssued() { return ammoIssued; }
     public void setAmmoIssued(int ammoIssued) { this.ammoIssued = ammoIssued; }
     public Integer getAmmoReturned() { return ammoReturned; }
     public void setAmmoReturned(Integer ammoReturned) { this.ammoReturned = ammoReturned; }
+    public int getAmmoConsumed() { return ammoConsumed; }
+    public void setAmmoConsumed(int ammoConsumed) { this.ammoConsumed = ammoConsumed; }
+    public String getReconciliationStatus() { return reconciliationStatus; }
+    public void setReconciliationStatus(String reconciliationStatus) { this.reconciliationStatus = reconciliationStatus; }
     public LocalDateTime getIssuedAt() { return issuedAt; }
     public void setIssuedAt(LocalDateTime issuedAt) { this.issuedAt = issuedAt; }
     public LocalDateTime getDueAt() { return dueAt; }

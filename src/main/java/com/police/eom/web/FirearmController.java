@@ -39,7 +39,7 @@ public class FirearmController {
     @PostMapping("/{id}/issue")
     public ResponseEntity<FirearmIssuance> issue(@PathVariable Long id, @RequestBody IssueRequest req) {
         FirearmIssuance iss = service.issue(id, req.getOfficerId(), req.getPurpose(),
-                req.getAmmoIssued(), req.getDueAt());
+                req.getAmmoBatchId(), req.getAmmoIssued(), req.getDueAt());
         return ResponseEntity.status(HttpStatus.CREATED).body(iss);
     }
 

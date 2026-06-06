@@ -19,13 +19,16 @@ public class FirearmService {
     private final FirearmRepository firearmRepo;
     private final FirearmIssuanceRepository issuanceRepo;
     private final OfficerRepository officerRepo;
+    private final AmmoService ammoService;
 
     public FirearmService(FirearmRepository firearmRepo,
                           FirearmIssuanceRepository issuanceRepo,
-                          OfficerRepository officerRepo) {
+                          OfficerRepository officerRepo,
+                          AmmoService ammoService) {
         this.firearmRepo = firearmRepo;
         this.issuanceRepo = issuanceRepo;
         this.officerRepo = officerRepo;
+        this.ammoService = ammoService;
     }
 
     public List<Firearm> list(String status) {
@@ -56,7 +59,7 @@ public class FirearmService {
 
     @Transactional
     public FirearmIssuance issue(Long firearmId, Long officerId, String purpose,
-                                 int ammoIssued, LocalDateTime dueAt) {
+                                 Long ammoBatchId, int ammoIssued, LocalDateTime dueAt) {
         Firearm firearm = get(firearmId);
         if (!"IN_STORE".equals(firearm.getStatus())) {
             throw ApiException.conflict("枪械当前不可领用，状态：" + firearm.getStatus());
@@ -70,6 +73,9 @@ public class FirearmService {
         if (dueAt == null || !dueAt.isAfter(LocalDateTime.now())) {
             throw ApiException.badRequest("应归还时间必须晚于当前时间");
         }
+        if (ammoIssued > 0 && ammoBatchId == null) {
+            throw ApiException.badRequest("发放弹药时必须指定弹药批次");
+        }
 
         firearm.setStatus("ISSUED");
         firearmRepo.save(firearm);
@@ -78,10 +84,17 @@ public class FirearmService {
         iss.setFirearmId(firearmId);
         iss.setOfficerId(officerId);
         iss.setPurpose(purpose == null ? "" : purpose);
+        iss.setAmmoBatchId(ammoBatchId);
         iss.setAmmoIssued(ammoIssued);
         iss.setDueAt(dueAt);
         iss.setStatus("ISSUED");
-        return issuanceRepo.save(iss);
+        iss = issuanceRepo.save(iss);
+
+        if (ammoIssued > 0 && ammoBatchId != null) {
+            ammoService.issueAmmo(iss.getId(), ammoBatchId, ammoIssued, officerId);
+        }
+
+        return iss;
     }
 
     @Transactional
@@ -94,19 +107,29 @@ public class FirearmService {
                 .findFirstByFirearmIdAndStatusOrderByIssuedAtDesc(firearmId, "ISSUED")
                 .orElseThrow(() -> ApiException.conflict("找不到该枪械的未归还领用记录"));
 
+        if (iss.getAmmoIssued() > 0 && ammoReturned == null) {
+            throw ApiException.badRequest("该领用记录发放了弹药，必须指定归还弹药数");
+        }
+
         if (ammoReturned != null) {
             if (ammoReturned < 0) throw ApiException.badRequest("归还弹药数不能为负");
             if (ammoReturned > iss.getAmmoIssued()) {
                 throw ApiException.badRequest("归还弹药数不能超过发放数");
             }
             iss.setAmmoReturned(ammoReturned);
+
+            if (ammoReturned > 0 && iss.getAmmoBatchId() != null) {
+                ammoService.returnAmmo(iss.getId(), iss.getAmmoBatchId(), ammoReturned, iss.getOfficerId());
+            }
         }
+
         iss.setStatus("RETURNED");
         iss.setReturnedAt(LocalDateTime.now());
         issuanceRepo.save(iss);
 
         firearm.setStatus("IN_STORE");
         firearmRepo.save(firearm);
+
         return iss;
     }
 

@@ -22,5 +22,18 @@ INSERT IGNORE INTO firearms (id, serial_no, model, type, caliber, status) VALUES
   (2, 'QX-77-100232', '92式手枪', 'PISTOL', '9mm', 'ISSUED'),
   (3, 'QX-79-200145', '79式微冲', 'SUBMACHINE_GUN', '7.62mm', 'IN_STORE');
 
-INSERT IGNORE INTO firearm_issuances (id, firearm_id, officer_id, purpose, ammo_issued, issued_at, due_at, status) VALUES
-  (1, 2, 4, '武装巡逻执勤', 15, '2026-06-01 08:00:00.000', '2026-06-01 20:00:00.000', 'ISSUED');
+INSERT IGNORE INTO ammo_batches (id, batch_no, caliber, model, manufacturer, production_date, expiry_date, initial_quantity, current_quantity, status, version) VALUES
+  (1, 'AMMO-9MM-2026-001', '9mm', '92式手枪弹', '北方工业', '2026-01-15', '2029-01-15', 500, 485, 'ACTIVE', 0),
+  (2, 'AMMO-762-2026-001', '7.62mm', '79式微冲弹', '北方工业', '2026-02-20', '2029-02-20', 300, 300, 'ACTIVE', 0),
+  (3, 'AMMO-9MM-2025-002', '9mm', '92式手枪弹', '北方工业', '2025-06-10', '2028-06-10', 200, 200, 'ACTIVE', 0);
+
+INSERT IGNORE INTO ammo_transactions (id, batch_id, transaction_type, quantity, balance_after, reference_type, reference_id, operator_id, remark, occurred_at) VALUES
+  (1, 1, 'IN', 500, 500, 'PURCHASE', NULL, 3, '初始入库', '2026-05-20 10:00:00.000'),
+  (2, 2, 'IN', 300, 300, 'PURCHASE', NULL, 3, '初始入库', '2026-05-20 10:05:00.000'),
+  (3, 3, 'IN', 200, 200, 'PURCHASE', NULL, 3, '初始入库', '2026-05-20 10:10:00.000');
+
+INSERT IGNORE INTO firearm_issuances (id, firearm_id, officer_id, purpose, ammo_batch_id, ammo_issued, ammo_returned, ammo_consumed, reconciliation_status, issued_at, due_at, status) VALUES
+  (1, 2, 4, '武装巡逻执勤', 1, 15, NULL, 0, 'PENDING', '2026-06-01 08:00:00.000', '2026-06-01 20:00:00.000', 'ISSUED');
+
+INSERT IGNORE INTO ammo_transactions (id, batch_id, transaction_type, quantity, balance_after, reference_type, reference_id, operator_id, remark, occurred_at) VALUES
+  (4, 1, 'OUT', 15, 485, 'ISSUANCE', 1, 3, '陈海涛领用', '2026-06-01 08:00:00.000');
